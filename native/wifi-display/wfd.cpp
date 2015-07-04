@@ -1,18 +1,3 @@
-/*
- * Copyright 2012, The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "wfd"
@@ -66,10 +51,10 @@ private:
 
     bool mDone;
 	
-	//SurfaceFlingerÔËĞĞÓÚSystemServerÕâÒ»ÏµÍ³½ø³ÌÖĞ£¬ĞèÒªUI½çÃæÏÔÊ¾µÄÓ¦ÓÃ³ÌĞòÔòÍ¨¹ıbinder·şÎñÓëËü½øĞĞ¿ç½ø³ÌÍ¨ĞÅ¡£
-	//ÔÚÒôÆµÏµÍ³µÄÑ§Ï°ÖĞ£¬Ã¿Ò»¸öAudioTrackÔÚAudioFlingerÖĞ¶¼¿ÉÒÔÕÒµ½Ò»¸ö¶ÔÓ¦µÄTrackÊµÏÖ¡£ÕâÖÖÉè¼Æ·½Ê½Í¬ÑùÊÊÓÃÓÚÏÔ
-	//Ê¾ÏµÍ³£¬¼´ÈÎºÎÓĞUI½çÃæµÄ³ÌĞò¶¼ÔÚSurfaceFlingerÖĞÓĞÇÒ½öÓĞÒ»¸öClientÊµÀı¡£
-	//Ó¦ÓÃ³ÌĞòÓëSurfaceFlinger¼äµÄ½Ó¿ÚÊÇISurfaceComposerClient
+	//SurfaceFlingerè¿è¡ŒäºSystemServerè¿™ä¸€ç³»ç»Ÿè¿›ç¨‹ä¸­ï¼Œéœ€è¦UIç•Œé¢æ˜¾ç¤ºçš„åº”ç”¨ç¨‹åºåˆ™é€šè¿‡binderæœåŠ¡ä¸å®ƒè¿›è¡Œè·¨è¿›ç¨‹é€šä¿¡ã€‚
+	//åœ¨éŸ³é¢‘ç³»ç»Ÿçš„å­¦ä¹ ä¸­ï¼Œæ¯ä¸€ä¸ªAudioTrackåœ¨AudioFlingerä¸­éƒ½å¯ä»¥æ‰¾åˆ°ä¸€ä¸ªå¯¹åº”çš„Trackå®ç°ã€‚è¿™ç§è®¾è®¡æ–¹å¼åŒæ ·é€‚ç”¨äºæ˜¾
+	//ç¤ºç³»ç»Ÿï¼Œå³ä»»ä½•æœ‰UIç•Œé¢çš„ç¨‹åºéƒ½åœ¨SurfaceFlingerä¸­æœ‰ä¸”ä»…æœ‰ä¸€ä¸ªClientå®ä¾‹ã€‚
+	//åº”ç”¨ç¨‹åºä¸SurfaceFlingeré—´çš„æ¥å£æ˜¯ISurfaceComposerClient
     sp<SurfaceComposerClient> mComposerClient;
 
     sp<ISurfaceTexture> mSurfaceTexture;
@@ -189,11 +174,11 @@ static void createSource(const AString &addr, int32_t port) {
 int main(int argc, char **argv) {
     using namespace android;
 
-	//¸ºÔğ´ò¿ªBinderÇı¶¯£¬½¨Á¢Ïß³Ì³Ø£¬ÈÃÆä½ø³ÌÀïÃæµÄËùÓĞÏß³Ì¶¼ÄÜÍ¨¹ıBinderÍ¨ĞÅ http://blog.csdn.net/pi9nc/article/details/9749325
-	//Ã¿¸öÏß³Ì¶¼ÓĞÒ»¸öIPCThreadStateÊµÀıµÇ¼ÇÔÚLinuxÏß³ÌµÄÉÏÏÂÎÄ¸½ÊôÊı¾İÖĞ£¬Ö÷Òª¸ºÔğBinderµÄ¶ÁÈ¡£¬Ğ´ÈëºÍÇëÇó´¦Àí¿ò¼Ü
+	//è´Ÿè´£æ‰“å¼€Binderé©±åŠ¨ï¼Œå»ºç«‹çº¿ç¨‹æ± ï¼Œè®©å…¶è¿›ç¨‹é‡Œé¢çš„æ‰€æœ‰çº¿ç¨‹éƒ½èƒ½é€šè¿‡Binderé€šä¿¡ http://blog.csdn.net/pi9nc/article/details/9749325
+	//æ¯ä¸ªçº¿ç¨‹éƒ½æœ‰ä¸€ä¸ªIPCThreadStateå®ä¾‹ç™»è®°åœ¨Linuxçº¿ç¨‹çš„ä¸Šä¸‹æ–‡é™„å±æ•°æ®ä¸­ï¼Œä¸»è¦è´Ÿè´£Binderçš„è¯»å–ï¼Œå†™å…¥å’Œè¯·æ±‚å¤„ç†æ¡†æ¶
     ProcessState::self()->startThreadPool();
 
-	//»ùÀàDataSourceÌá¹©ÁËÒ»Ğ©·ÖÀëÆ÷
+	//åŸºç±»DataSourceæä¾›äº†ä¸€äº›åˆ†ç¦»å™¨
     DataSource::RegisterDefaultSniffers();
 
     AString connectToHost;
@@ -205,11 +190,11 @@ int main(int argc, char **argv) {
 
     int res;
 
-	//½âÎö²ÎÊı
+	//è§£æå‚æ•°
     while ((res = getopt(argc, argv, "hc:l:u:")) >= 0) {
         switch (res) {
     	
-		//½¨Á¢Á¬½Ó£¬ÉèÖÃÄ¬ÈÏ¶Ë¿Ú        
+		//å»ºç«‹è¿æ¥ï¼Œè®¾ç½®é»˜è®¤ç«¯å£        
 		case 'c':
             {
 
@@ -298,7 +283,7 @@ int main(int argc, char **argv) {
     sp<ANetworkSession> session = new ANetworkSession;
     session->start();
 
-	//strong pointer£¬¶øwpÔòÊÇweak pointerµÄÒâË¼
+	//strong pointerï¼Œè€Œwpåˆ™æ˜¯weak pointerçš„æ„æ€
     sp<ALooper> looper = new ALooper;
 
     sp<WifiDisplaySink> sink = new WifiDisplaySink(session);
