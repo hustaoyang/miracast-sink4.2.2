@@ -1,18 +1,3 @@
-/*
- * Copyright 2012, The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 #define LOG_NDEBUG 0
 #define LOG_TAG "NetworkSession"
@@ -577,13 +562,16 @@ status_t ANetworkSession::start() {
     if (mThread != NULL) {
         return INVALID_OPERATION;
     }
-
-    int res = pipe(mPipeFd);  //建立读写管道，控制threadLoop的执行
+	
+	//让ANetworkSession不断的做select循环，当有事务要处理时，就从select中跳出来处理
+    int res = pipe(mPipeFd);  //建立读写管道，控制threadLoop的执行 
     if (res != 0) {
         mPipeFd[0] = mPipeFd[1] = -1;
         return -errno;
     }
 
+	//创建一个NetworkThread，NetworkThread也是继承于Thread，并实现threadLoop方法，
+	//在threadLoop方法中只是简单的调用ANetworkSession的threadLoop方法
     mThread = new NetworkThread(this);  //构造ANetworkSession的内部结构线程
 
 	//以ANDROID_PRIORITY_AUDIO优先级启动ANetworkSession，开启该线程 
@@ -757,6 +745,7 @@ status_t ANetworkSession::createClientOrServer(
             || mode == kModeCreateTCPDatagramSessionPassive) {
         const int yes = 1;
 		///允许socket和一个已在使用中的地址捆绑 
+		// 控制套接字行为，SOL_SOCKET 通用套接字层次选项， yes非零重用bind中的地址（SO_REUSEADDR指定）
         res = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
         if (res < 0) {
@@ -768,13 +757,15 @@ status_t ANetworkSession::createClientOrServer(
     if (mode == kModeCreateUDPSession) {
         int size = 256 * 1024;
 
+		//接受缓冲区的字节长度
         res = setsockopt(s, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
 
         if (res < 0) {
             err = -errno;
             goto bail2;
         }
-
+		
+		//发送缓冲区的字节长度
         res = setsockopt(s, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
 
         if (res < 0) {
@@ -895,8 +886,9 @@ status_t ANetworkSession::createClientOrServer(
             break;
     }
 
-	//创建一个session对象,sessionID加1 
-    session = new Session(
+	//创建一个session对象,sessionID+1 
+	// notify是一个kWhatRTSPNotify的AMessag
+	session = new Session(
             mNextSessionID++,  
             state,
             s,
@@ -908,9 +900,10 @@ status_t ANetworkSession::createClientOrServer(
         session->setIsRTSPConnection(true);
     }
 
-	//将该对象加入vector结构中保存
+	//将该session会话加入mSessions结构中保存
     mSessions.add(session->sessionID(), session);
 
+	// ANetworkSession的NetworkThread线程跳出select语句，并重新计算readFd和writeFd用于select监听的文件句柄
     interrupt();//ANetworkSession::interrupt(),向管道写端写数据 
 
     *sessionID = session->sessionID();//由指针带出当前sessionID
@@ -982,6 +975,7 @@ status_t ANetworkSession::sendRequest(
     return err;
 }
 
+// 向pipe中写入一个空消息，把刚刚创建的socket加入到监听的readFd中
 void ANetworkSession::interrupt() {
     static const char dummy = 0;
 

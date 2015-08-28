@@ -58,8 +58,23 @@ WifiDisplaySource::WifiDisplaySource(
       mHDCPPort(0),
       mHDCPInitializationComplete(false),
       mSetupTriggerDeferred(false)
-{
-}
+	  /* mPlaybackSessionEstablished(false) {  
+		if (path != NULL) {  
+			mMediaPath.setTo(path);  
+		}  
+  
+		mSupportedSourceVideoFormats.disableAll();  
+  
+		mSupportedSourceVideoFormats.setNativeResolution(  
+				VideoFormats::RESOLUTION_CEA, 5);  // 1280x720 p30  
+  
+		// Enable all resolutions up to 1280x720p30  
+		mSupportedSourceVideoFormats.enableResolutionUpto(  
+				VideoFormats::RESOLUTION_CEA, 5,  
+				VideoFormats::PROFILE_CHP,  // Constrained High Profile  
+				VideoFormats::LEVEL_32);    // Level 3.2  
+}  
+*/ {}
 
 WifiDisplaySource::~WifiDisplaySource() {
 }
@@ -71,7 +86,8 @@ status_t WifiDisplaySource::start(const char *iface) {
 
 	
 	//用于在onMessageReceived处理分支中进行匹配，msg->setString(“iface”,iface)用于在传递消息过程中携带网络地址端口信息
-    sp<AMessage> msg = new AMessage(kWhatStart, id()); //接收到kWhatStart消息后，进行onMessageReceived()处理
+    sp<AMessage> msg = new AMessage(kWhatStart, id()); //接收到kWhatStart消息种类后，
+	// id()返回ALooperRoster注册的handlerID值， 进行onMessageReceived()处理
     msg->setString("iface", iface);
 
 	//msg->postAndAwaitResponse用于返回相应结果
@@ -114,6 +130,7 @@ void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
 			//从WifiDisplaySource::start中的msg->postAndAwaitResponse获取对应于postAndAwaitResponse函数的响应标识
             CHECK(msg->senderAwaitsResponse(&replyID));
 
+			//获取iface
             AString iface;
             CHECK(msg->findString("iface", &iface));
 
@@ -124,6 +141,7 @@ void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
             unsigned long port;
 
             if (colonPos >= 0) {
+				// port 的起始位置
                 const char *s = iface.c_str() + colonPos + 1;
 
                 char *end;
@@ -132,6 +150,7 @@ void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
                 if (end == s || *end != '\0' || port > 65535) {
                     err = -EINVAL;
                 } else {
+					// 取得port 剩余为ip
                     iface.erase(colonPos, iface.size() - colonPos);
                 }
             } else {
